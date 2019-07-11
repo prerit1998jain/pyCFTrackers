@@ -18,14 +18,29 @@ from cftracker.strcf import STRCF
 from cftracker.mccth_staple import MCCTHStaple
 from lib.eco.config import otb_deep_config,otb_hc_config
 from cftracker.config import staple_config,ldes_config,dsst_config,csrdcf_config,mkcf_up_config,mccth_staple_config
+
 class PyTracker:
     def __init__(self,img_dir,tracker_type,dataset_config):
+
+        # img_directory is an attribute
         self.img_dir=img_dir
+
+        # tracker type definition
         self.tracker_type=tracker_type
+
+        # get_img_list function appends the name of all jpg files into a list.
         self.frame_list = get_img_list(img_dir)
+
+        # Sorting the frame_list
         self.frame_list.sort()
+
+        # name of the folder
         dataname=img_dir.split('/')[-2]
+
+        # Getting the ground truth
         self.gts=get_ground_truthes(img_dir[:-4])
+
+
         if dataname in dataset_config.frames.keys():
             start_frame,end_frame=dataset_config.frames[dataname][0:2]
             if dataname!='David':
@@ -35,6 +50,8 @@ class PyTracker:
             self.frame_list=self.frame_list[start_frame-1:end_frame]
         else:
             self.init_gt=self.gts[0]
+
+        # Calling the appropriate tracker class as asked for.
         if self.tracker_type == 'MOSSE':
             self.tracker=MOSSE()
         elif self.tracker_type=='CSK':
@@ -88,24 +105,59 @@ class PyTracker:
         else:
             raise NotImplementedError
 
+    '''
+    Tracking method
+
+    INPUTS:
+    verbose    : (a binary variable)
+    video_path : (default- None,
+                  Can be added.)
+    OUTPUTS:
+    poses : list of futurn positions
+
+    '''
     def tracking(self,verbose=True,video_path=None):
         poses = []
+
+        # Initial Frame, reading through frame_list
         init_frame = cv2.imread(self.frame_list[0])
-        #print(init_frame.shape)
+
+        # print(init_frame.shape)
         init_gt = np.array(self.init_gt)
-        x1, y1, w, h =init_gt
+
+        # coordinates of centre, width and height
+        x1, y1, w, h = init_gt
         init_gt=tuple(init_gt)
+
+        # Input to the tracker
         self.tracker.init(init_frame,init_gt)
         writer=None
+
+        # Writing the file into a video if video path is available
         if verbose is True and video_path is not None:
             writer = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (init_frame.shape[1], init_frame.shape[0]))
 
+        # Traversing over the list of frames
         for idx in range(len(self.frame_list)):
             if idx != 0:
+                # Reading the frame at the current index
                 current_frame=cv2.imread(self.frame_list[idx])
                 height,width=current_frame.shape[:2]
-                bbox=self.tracker.update(current_frame,vis=verbose)
+
+                # Calling the update method of the tracker class.
+                '''
+                UPDATE METHOD:
+                INPUT:
+                a) current_frame
+                b) verbose
+                OUTPUT:
+                bbox coordinates in this frame.
+
+                '''
+                bbox=self.tracker.update(current_frame, vis=verbose)
                 x1,y1,w,h=bbox
+
+                #
                 if verbose is True:
                     if len(current_frame.shape)==2:
                         current_frame=cv2.cvtColor(current_frame,cv2.COLOR_GRAY2BGR)
@@ -160,4 +212,3 @@ class PyTracker:
 
             poses.append(np.array([int(x1), int(y1), int(w), int(h)]))
         return np.array(poses)
-
