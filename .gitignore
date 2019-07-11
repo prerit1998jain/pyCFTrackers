@@ -9,5 +9,4 @@
 .eval/log_test_vot2016.txt
 .eval/log_test_vot2018.txt
 /got10k/
-
-
+.json
