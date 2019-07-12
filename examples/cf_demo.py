@@ -4,7 +4,7 @@ from lib.utils import get_ground_truthes,plot_precision,plot_success
 from examples.otbdataset_config import OTBDatasetConfig
 
 if __name__ == '__main__':
-    # Data to be installed.
+    # Data to be installed in one folder up test folder.
     data_dir='../dataset/test'
 
     # Making a sorted list of the data files in the particular path
@@ -37,6 +37,6 @@ if __name__ == '__main__':
 
         # tracking method returns the coordinates of the bounding boxes in the furthur frames
         poses=tracker.tracking(verbose=True,video_path=os.path.join('../results/CF',data_name+'_vis.avi'))
-        
+
         plot_success(gts,poses,os.path.join('../results/CF',data_name+'_success.jpg'))
         plot_precision(gts,poses,os.path.join('../results/CF',data_name+'_precision.jpg'))
