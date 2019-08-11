@@ -41,7 +41,6 @@ class CSRDCF(BaseCF):
         self.scale_type = config.scale_type
         self.scale_config = config.scale_config
 
-
         self.hist_fg_p_bins=None
         self.hist_bg_p_bins=None
         self.p_b=0
@@ -622,23 +621,3 @@ class Segment:
     @staticmethod
     def _gaussian(x2,y2,std2):
         return np.exp(-(x2+y2)/(2*std2))/(2*np.pi*std2)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
